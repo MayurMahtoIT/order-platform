@@ -1,0 +1,29 @@
+services:
+  order-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: orders
+      POSTGRES_PASSWORD: orders_dev_pw
+      POSTGRES_DB: orders
+    ports:
+      - "5433:5432"          # host:container (5433 avoids clashing with a local Postgres)
+    volumes:
+      - order-db-data:/var/lib/postgresql/data   # data survives container restarts
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U orders -d orders"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  order-service:
+    build: ./services/order-service
+    environment:
+      DATABASE_URL: postgresql+psycopg://orders:orders_dev_pw@order-db:5432/orders
+    ports:
+      - "8001:8000"
+    depends_on:
+      order-db:
+        condition: service_healthy   # wait until Postgres is actually ready
+
+volumes:
+  order-db-data:
