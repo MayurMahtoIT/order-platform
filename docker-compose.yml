@@ -15,6 +15,16 @@ services:
       timeout: 3s
       retries: 10
 
+  # One-shot job: applies migrations, then exits. Same image as the app.
+  order-migrate:
+    build: ./services/order-service
+    command: ["alembic", "upgrade", "head"]
+    environment:
+      DATABASE_URL: postgresql+psycopg://orders:orders_dev_pw@order-db:5432/orders
+    depends_on:
+      order-db:
+        condition: service_healthy
+
   order-service:
     build: ./services/order-service
     environment:
@@ -22,8 +32,8 @@ services:
     ports:
       - "8001:8000"
     depends_on:
-      order-db:
-        condition: service_healthy   # wait until Postgres is actually ready
+      order-migrate:
+        condition: service_completed_successfully   # start only after migrations succeed
 
 volumes:
   order-db-data:
