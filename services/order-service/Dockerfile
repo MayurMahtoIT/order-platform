@@ -11,6 +11,8 @@ RUN useradd --create-home --uid 1000 appuser   # never run as root in production
 COPY --from=builder /install /usr/local
 WORKDIR /app
 COPY app ./app
+COPY alembic.ini ./
+COPY migrations ./migrations
 USER appuser
 EXPOSE 8000
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

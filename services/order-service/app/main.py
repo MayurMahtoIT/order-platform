@@ -1,21 +1,12 @@
-from contextlib import asynccontextmanager
-
 from fastapi import FastAPI
 from sqlalchemy import text
 
 from app.config import settings
-from app.database import Base, SessionLocal, engine
+from app.database import SessionLocal
 from app.routers import orders
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # TEMPORARY: auto-create tables. Next step we replace this with Alembic migrations.
-    Base.metadata.create_all(bind=engine)
-    yield
-
-
-app = FastAPI(title=settings.service_name, lifespan=lifespan)
+app = FastAPI(title=settings.service_name)
 app.include_router(orders.router)
 
 
