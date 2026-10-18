@@ -5,7 +5,6 @@ from app.config import settings
 from app.database import SessionLocal
 from app.routers import orders
 
-
 app = FastAPI(title=settings.service_name)
 app.include_router(orders.router)
 
